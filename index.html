@@ -1,0 +1,63 @@
+<html>
+	<head>
+		<title>Upload Streamer</title>
+		<script type="text/javascript" src="./js/jquery-1.5.min.js"></script>
+	</head>
+  <body>
+		<script type="text/javascript">
+
+    var host = 'http://localhost:8001';
+
+    var refresh = function() {
+      $.ajax({
+        async: true,
+        type: "GET",
+        url: host+'/update',
+        dataType: 'json',
+        cache: false,
+
+        error: function () {
+          //wait 10 seconds before retrying
+          setTimeout(refresh, 10000);
+        },
+
+        success: function(result, textStatus, XMLHttpRequest){
+          $("#status").html(result.percent + "%");
+          setTimeout(refresh, 5000);
+        },
+
+        error: function(XMLHttpRequest, textStatus, errorThrown){
+          console.debug('textStatus: ' + textStatus + ",\nXHR.readyState: " + XMLHttpRequest.readyState + ",\nXHT.status: " + XMLHttpRequest.status);          
+          setTimeout(refresh, 5000);
+        }
+      });
+    };
+    
+    function upload_file(){
+      //setTimeout(refresh, 1000);
+      //IE
+      if( document.upload_form){
+          document.upload_form.setAttribute('target','frame_x');
+          document.upload_form.submit();
+      //FF
+      } else {
+        var form = document.getElementById('upload_form');
+        form.setAttribute('target', 'frame_x');
+        form.submit();
+      }
+      setTimeout(refresh, 5000);
+    }
+    
+  </script>
+
+    <form action="http://localhost:8001/upload" enctype="multipart/form-data" method="post" onsubmit="upload_file();" name="upload_form" id="upload_form" target="">
+      <input type="text" name="title" id="title"><br>
+      <input type="file" name="upload"><br />
+      <input type="submit" value="Upload" id="uploadform">
+      <span id="status"></span>
+    </form>
+    
+    <iframe id="frame_x" name="frame_x"></iframe>
+    
+	</body>
+</html>
